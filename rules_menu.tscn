@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3 uid="uid://smtwt3d8ajo4"]
+
+[ext_resource type="Script" path="res://rules_menu.gd" id="1_fb70j"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_48vxq"]
+font_size = 48
+font_color = Color(0, 0, 0, 1)
+
+[node name="RulesMenu" type="CanvasLayer"]
+script = ExtResource("1_fb70j")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = 370.0
+offset_top = 69.0
+offset_right = 410.0
+offset_bottom = 109.0
+scale = Vector2(12.2, 12.2)
+color = Color(0.686275, 0.686275, 0.686275, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 535.0
+offset_top = 79.0
+offset_right = 723.0
+offset_bottom = 181.0
+text = "Rules"
+label_settings = SubResource("LabelSettings_48vxq")
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(400, 325)
+offset_left = 425.0
+offset_top = 151.0
+offset_right = 825.0
+offset_bottom = 551.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(400, 325)
+layout_mode = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+text = "Each player has a number card. You can see each other player's number card, but not your own. There is also a card in the middle which you can't see initially. At the start of the round, all cards in the deck are shuffled and dealt out.
+
+Each player also starts the game with 3 Eye cards. 2 are open and 1 is closed.
+
+Each number card has a number on it. There are -10, -5, 0 through 10, 15, and 20. There are also two special cards that affect the total:
+?- If this is in play, a new card is drawn from the deck and added to the total.
+Max 0- If this is in play, the highest card in play has its value changed to 0. (This is applied after the card from ? is drawn.)
+
+The first player to go in a round places a starting bid. After that, the turn passes to the next player.
+
+Players have three choices on each of their turns:
+- Raise the bid, trying to not go over the total.
+- Peek. This can only be done if you have at least one open Eye card. To peek, flip one of your open Eye cards closed, then look at the card in the middle. After doing this, you must raise the bid.
+- Challenge. Do this if you think that the previous bid is higher than the total. Everyone reveals what cards they had. You win the challenge if the previous bid was higher than the total; otherwise, the previous bidder wins. The player who won the challenge flips one of their closed Eye cards back to open. The losing player discards one of their Eye cards (which can be closed). After this, the player who lost the challenge takes the next turn. If that player is now out of the game, the next living player in turn order goes instead.
+
+Once a player has no Eye cards left (closed or open), they're out of the game. Once only one player is left in the game, that player wins!"
+
+[node name="CloseButton" type="Button" parent="."]
+offset_left = 578.0
+offset_top = 506.0
+offset_right = 628.0
+offset_bottom = 537.0
+text = "Close"
+
+[connection signal="pressed" from="CloseButton" to="." method="_on_button_pressed"]

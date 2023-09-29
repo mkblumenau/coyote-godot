@@ -1,0 +1,164 @@
+[gd_scene load_steps=7 format=3 uid="uid://byg7wjsgjrbli"]
+
+[ext_resource type="Script" path="res://gameplay.gd" id="1_n4dm1"]
+[ext_resource type="PackedScene" uid="uid://lw0pg0r1fgef" path="res://player.tscn" id="2_u7p6k"]
+[ext_resource type="PackedScene" uid="uid://0s8rdift2p8i" path="res://middle_card.tscn" id="3_aimk4"]
+[ext_resource type="Script" path="res://GameLogText.gd" id="4_qwqk2"]
+[ext_resource type="PackedScene" uid="uid://smtwt3d8ajo4" path="res://rules_menu.tscn" id="5_0g5hf"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_7urhw"]
+font_size = 32
+font_color = Color(0, 0, 0, 1)
+
+[node name="Gameplay" type="Node"]
+script = ExtResource("1_n4dm1")
+playerTemplate = ExtResource("2_u7p6k")
+
+[node name="PlayerGrid" type="GridContainer" parent="."]
+scale = Vector2(0.35, 0.35)
+theme_override_constants/h_separation = 900
+theme_override_constants/v_separation = 250
+columns = 2
+
+[node name="MiddleCard" parent="PlayerGrid" instance=ExtResource("3_aimk4")]
+layout_mode = 2
+
+[node name="ChallengeTimer" type="Timer" parent="."]
+wait_time = 4.0
+one_shot = true
+
+[node name="UICanvas" type="CanvasLayer" parent="."]
+
+[node name="GameLog" type="ScrollContainer" parent="UICanvas"]
+custom_minimum_size = Vector2(300, 300)
+offset_left = 795.0
+offset_top = 129.0
+offset_right = 835.0
+offset_bottom = 169.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UICanvas/GameLog"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+
+[node name="GameLogText" type="RichTextLabel" parent="UICanvas/GameLog/VBoxContainer"]
+layout_mode = 2
+text = "Welcome to Coyote!"
+fit_content = true
+script = ExtResource("4_qwqk2")
+
+[node name="RaiseBidButton" type="Button" parent="UICanvas"]
+visible = false
+offset_left = 204.0
+offset_top = 614.0
+offset_right = 282.0
+offset_bottom = 645.0
+text = "Raise bid"
+
+[node name="PeekButton" type="Button" parent="UICanvas"]
+visible = false
+offset_left = 106.0
+offset_top = 614.0
+offset_right = 184.0
+offset_bottom = 645.0
+text = "Peek"
+
+[node name="ChallengeButton" type="Button" parent="UICanvas"]
+visible = false
+offset_top = 614.0
+offset_right = 85.0
+offset_bottom = 645.0
+text = "Challenge"
+
+[node name="BidInput" type="SpinBox" parent="UICanvas"]
+visible = false
+offset_left = 294.0
+offset_top = 614.0
+offset_right = 377.063
+offset_bottom = 645.0
+min_value = -15.0
+rounded = true
+alignment = 1
+update_on_text_changed = true
+select_all_on_focus = true
+
+[node name="TotalVisibleToPlayer" type="Label" parent="UICanvas"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -85.0
+offset_top = -26.0
+offset_right = 85.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Total visible to player:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpenMenuButton" type="Button" parent="UICanvas"]
+offset_left = 972.0
+offset_top = 601.0
+offset_right = 1146.0
+offset_bottom = 632.0
+text = "Open menu"
+
+[node name="Menu" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="Menu"]
+custom_minimum_size = Vector2(200, 0)
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+color = Color(0.65098, 0.65098, 0.65098, 1)
+
+[node name="Label" type="Label" parent="Menu"]
+offset_left = 1006.0
+offset_right = 1094.0
+offset_bottom = 48.0
+text = "Menu"
+label_settings = SubResource("LabelSettings_7urhw")
+
+[node name="ReturnToMainButton" type="Button" parent="Menu"]
+offset_left = 972.0
+offset_top = 82.0
+offset_right = 1146.0
+offset_bottom = 113.0
+text = "Return to main menu"
+
+[node name="CloseMenuButton" type="Button" parent="Menu"]
+offset_left = 972.0
+offset_top = 601.0
+offset_right = 1146.0
+offset_bottom = 632.0
+text = "Close menu"
+
+[node name="SaveToFileButton" type="Button" parent="Menu"]
+offset_left = 972.0
+offset_top = 521.0
+offset_right = 1146.0
+offset_bottom = 552.0
+text = "Save game log to file"
+
+[node name="RulesButton" type="Button" parent="Menu"]
+offset_left = 972.0
+offset_top = 471.0
+offset_right = 1146.0
+offset_bottom = 502.0
+text = "Rules"
+
+[node name="RulesMenu" parent="." instance=ExtResource("5_0g5hf")]
+visible = false
+
+[connection signal="pressed" from="UICanvas/RaiseBidButton" to="." method="_on_raise_bid_button_pressed"]
+[connection signal="pressed" from="UICanvas/PeekButton" to="." method="_on_peek_button_pressed"]
+[connection signal="pressed" from="UICanvas/ChallengeButton" to="." method="_on_challenge_button_pressed"]
+[connection signal="pressed" from="UICanvas/OpenMenuButton" to="." method="_on_open_menu_button_pressed"]
+[connection signal="pressed" from="Menu/ReturnToMainButton" to="." method="_on_return_to_main_button_pressed"]
+[connection signal="pressed" from="Menu/CloseMenuButton" to="." method="_on_close_menu_button_pressed"]
+[connection signal="pressed" from="Menu/SaveToFileButton" to="UICanvas/GameLog/VBoxContainer/GameLogText" method="_on_save_to_file_button_pressed"]
+[connection signal="pressed" from="Menu/RulesButton" to="." method="_on_rules_button_pressed"]

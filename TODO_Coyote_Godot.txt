@@ -1,0 +1,31 @@
+Make scenes
+	Player object
+		Needs script with info
+		Needs the AI script
+	Main game
+		Will need visible:
+			Space for player objects
+			UI for bidding, menus
+			Game log (scrollbar)
+	UI for player to take a turn
+	
+Immediate goals:
+	Make the main menu button prompt for if you really want to return to main menu?
+		Might not be necessary now that you have to click two buttons to get to it
+	Implement the thing where all cards are shown after a challenge
+		Also, maybe make it so it somehow pauses before starting the next turn
+		after a challenge?
+		
+Useful information for writing this
+	See https://docs.godotengine.org/en/stable/classes/class_node.html# 
+	How to search through all children of a node to find nodes of a specific type
+		node.get_children(false) gets all child nodes
+			The bool as an argument says not to find internal children
+		node.get_child(int) gets the child node at position int
+			Can be negative, counting from the last
+			Also a bool true/false option for whether or not to include internal
+	How to rename a node
+		node.set_name("name")
+	How to get the name of a node
+		node.get_name()
+	show() and hide() for showing and hiding nodes
