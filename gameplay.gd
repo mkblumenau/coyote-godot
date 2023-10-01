@@ -27,6 +27,7 @@ var gameLog
 func _ready():
 	randomize()
 	gameLog = $UICanvas/GameLog/VBoxContainer/GameLogText
+	$UICanvas/OpenMenuButton.grab_focus()
 	var newPlayer
 	#print(str($/root/GlobalVariables.playerCount))
 	# Create the right number of players as children.
@@ -125,6 +126,7 @@ func nextLivingPlayerNew(player, direction):
 func setUpRound():
 	# Resets everything for a new round.
 	# However, this doesn't automatically start the turn.
+	allCardsVisible = false
 	makeDeck()
 	dealOutCards()
 	resetPeeks()
@@ -166,6 +168,7 @@ func dealOutCards():
 func resetPeeks():
 	# Resets whether players peeked.
 	for player in players():
+		player.canChallengeThisRound = true
 		if player.isAlive():
 			player.canSeeMiddleCard = false
 		else:
@@ -189,7 +192,7 @@ func startTurn():
 	if currentPlayer.isHumanPlayer:
 		# show the interface and set the minimum bid to the current + 1
 		#$UICanvas/BidInput.min_value = currentBid + 1
-		$UICanvas/BidInput.value = currentBid + 1
+		$UICanvas/PlayerUI/BidInput.value = currentBid + 1
 		showPlayerUI()
 		pass
 	else:
@@ -279,6 +282,11 @@ func resolveChallenge():
 	$ChallengeTimer.start()
 	# The timer is used for the coroutine in startChallenge().
 	# Basically it's there to make sure that the game pauses to wait out the challenge.
+	
+	# Setting allCardsVisible to true makes it so that players can see all cards
+	# until the start of the next round.
+	allCardsVisible = true
+	
 	var challenger = currentPlayer
 	var bidder = lastLivingPlayer(currentPlayer)
 	var questionSeen = false
@@ -360,23 +368,30 @@ func sendPeekToGameLog(player):
 
 
 func showPlayerUI():
-	$UICanvas/RaiseBidButton.show()
-	$UICanvas/PeekButton.show()
-	$UICanvas/ChallengeButton.show()
-	$UICanvas/BidInput.show()
+	$UICanvas/PlayerUI.show()
+	updatePlayerUIButtonStates()
+	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()
+	
+	
+func updatePlayerUIButtonStates():
+	$UICanvas/PlayerUI/PeekButton.set_disabled(false)
+	if isFirstTurnOfRound or currentPlayer.eyesOpen <= 0 or currentPlayer.canSeeMiddleCard:
+		$UICanvas/PlayerUI/PeekButton.set_disabled(true)
+		
+	$UICanvas/PlayerUI/ChallengeButton.set_disabled(false)
+	if isFirstTurnOfRound or currentPlayer.canChallengeThisRound == false:
+		$UICanvas/PlayerUI/ChallengeButton.set_disabled(true)
 
 
 func hidePlayerUI():
-	$UICanvas/RaiseBidButton.hide()
-	$UICanvas/PeekButton.hide()
-	$UICanvas/ChallengeButton.hide()
-	$UICanvas/BidInput.hide()
+	$UICanvas/PlayerUI.hide()
+	$UICanvas/OpenMenuButton.grab_focus()
 
 
 func _on_raise_bid_button_pressed():
 	hidePlayerUI()
-	if $UICanvas/BidInput.value > currentBid:
-		raiseBid($UICanvas/BidInput.value)
+	if $UICanvas/PlayerUI/BidInput.value > currentBid:
+		raiseBid($UICanvas/PlayerUI/BidInput.value)
 	else:
 		raiseBid(currentBid + 1)
 
@@ -393,6 +408,7 @@ func _on_peek_button_pressed():
 		if currentPlayer.eyesOpen > 0:
 			if currentPlayer.canChallengeThisRound:
 				currentPlayer.peek()
+	updatePlayerUIButtonStates()
 
 
 func _on_return_to_main_button_pressed():
@@ -401,12 +417,18 @@ func _on_return_to_main_button_pressed():
 
 func _on_open_menu_button_pressed():
 	$Menu.show()
+	$Menu/CloseMenuButton.grab_focus()
 
 
 func _on_close_menu_button_pressed():
 	$Menu.hide()
+	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()
 
 
 func _on_rules_button_pressed():
 	$RulesMenu.show()
 	$Menu.hide()
+
+
+func _on_close_button_pressed():
+	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()

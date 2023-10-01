@@ -1,9 +1,11 @@
 extends Control
 
 var card = 0
+var gameplayScript
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	gameplayScript = $/root/Gameplay # get the script for the main gameplay actions
 	pass # Replace with function body.
 
 
@@ -19,9 +21,12 @@ func setSprite():
 	var path = "res://assets/images/cards/"
 	var isVisible = true
 	
-	for p in playersList():
+	for p in gameplayScript.players():
 		if p.isUIPlayer and not p.canSeeMiddleCard:
 			isVisible = false
+			
+	if gameplayScript.allCardsVisible:
+		isVisible = true
 
 	if isVisible:
 		# Placeholders for before I import the values into/from the game manager.
@@ -37,13 +42,3 @@ func setSprite():
 	path += ".png"
 	#print(path)
 	$Sprite2D.set_texture(load(path))
-
-
-func playersList():
-	var tempList = get_parent().get_children()
-	var output = []
-	for i in tempList:
-		if i.is_in_group("Player"):
-			output.append(i)
-	
-	return output

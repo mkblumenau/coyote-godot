@@ -1,18 +1,12 @@
-Make scenes
-	Player object
-		Needs script with info
-		Needs the AI script
-	Main game
-		Will need visible:
-			Space for player objects
-			UI for bidding, menus
-			Game log (scrollbar)
-	UI for player to take a turn
-	
-Immediate goals:
+Goals:
+	Make the game log a little easier to read?
+		Idea: make the game log only visible through a menu
+		Instead, have a display for the most recent action
 	Make the main menu button prompt for if you really want to return to main menu?
 		Might not be necessary now that you have to click two buttons to get to it
-	Implement the thing where all cards are shown after a challenge
+	Improve the AI
+	Fix a bug: If you Shift-Tab from Open Menu when the user UI isn't showing,
+	you just completely lose the ability to focus
 		
 Useful information for writing this
 	See https://docs.godotengine.org/en/stable/classes/class_node.html# 

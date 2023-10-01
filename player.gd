@@ -149,7 +149,7 @@ func setSprite():
 	
 	if isAlive():
 		$Sprite2D.show()
-		if isUIPlayer:
+		if isUIPlayer and not gameplayScript.allCardsVisible:
 			path += "Back"
 		else:
 			if card == 99:

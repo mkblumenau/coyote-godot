@@ -32,6 +32,8 @@ offset_right = 35.0
 offset_bottom = 111.0
 grow_horizontal = 2
 grow_vertical = 2
+focus_next = NodePath("../StartGameButton")
+focus_previous = NodePath("../RulesButton")
 theme_override_font_sizes/font_size = 48
 item_count = 5
 selected = 1
@@ -73,6 +75,7 @@ offset_right = 60.5
 offset_bottom = -81.0
 grow_horizontal = 2
 grow_vertical = 0
+focus_previous = NodePath("../ChoosePlayerCount")
 theme_override_font_sizes/font_size = 48
 text = "Start"
 
@@ -88,6 +91,7 @@ offset_right = 60.5
 offset_bottom = -409.0
 grow_horizontal = 2
 grow_vertical = 0
+focus_next = NodePath("../ChoosePlayerCount")
 theme_override_font_sizes/font_size = 48
 text = "Rules"
 
@@ -97,3 +101,6 @@ visible = false
 [connection signal="item_selected" from="ChoosePlayerCount" to="." method="_on_option_button_item_selected"]
 [connection signal="pressed" from="StartGameButton" to="." method="_on_start_game_button_pressed"]
 [connection signal="pressed" from="RulesButton" to="." method="_on_rules_button_pressed"]
+[connection signal="pressed" from="RulesMenu/CloseButton" to="." method="_on_close_button_pressed"]
+
+[editable path="RulesMenu"]

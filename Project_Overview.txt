@@ -1,0 +1,27 @@
+Scenes:
+	main_menu
+		This is the default scene.
+		It allows players to choose the number of computer opponents, then start the game.
+	global_variables
+		This is set to autoload.
+		Currently its only purpose is to carry the number of computer players
+		from main_menu to gameplay.
+	gameplay
+		This is the scene where the game is actually played.
+		When it's called, it spawns in the players.
+		It also shows the players and other UI elements, such as the middle card,
+		the game log, the player controls, and the menu.
+	player
+		This scene is used in gameplay as an object representing a player.
+		It also displays the player's information; their name, number of eyes, card,
+		and when it's their turn.
+	middle_card
+		This is a variant of player used to display the middle card.
+	rules_menu
+		This is a simple menu showing the rules of the game.
+		It's incorporated into main_menu and gameplay.
+		
+Scripts:
+	Most of the gameplay actions are either in gameplay.gd or player.gd.
+	GameLogText.gd has some stuff to do with exporting to files.
+	Most of the other scripts really only have one or two functions.
