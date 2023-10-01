@@ -140,27 +140,29 @@ func isTurn():
 
 
 func setSprite():
-	""" Sets the sprite to a file based on what card it is. """
+	"""
+	Sets the sprite to a file based on what card it is,
+	as well as if the player is alive and/or the human player.
+	"""
 	#$Sprite2D.set_texture(load("res://assets/images/cards/Back.png"))
 	var path = "res://assets/images/cards/"
 	
-	if isUIPlayer:
-		path += "Back"
-	else:
-		if isAlive():
-		# Placeholders for before I import the values into/from the game manager.
+	if isAlive():
+		$Sprite2D.show()
+		if isUIPlayer:
+			path += "Back"
+		else:
 			if card == 99:
 				path += "Question mark"
 			elif card == 100:
 				path += "Max 0"
 			else:
 				path += str(card)
-		else:
-			path += "Back"
-	
-	path += ".png"
-	#print(path)
-	$Sprite2D.set_texture(load(path))
+		
+		path += ".png"
+		$Sprite2D.set_texture(load(path))
+	else:
+		$Sprite2D.hide()
 
 
 func updateName(newName):

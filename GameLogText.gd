@@ -33,10 +33,8 @@ func logInReverseOrder():
 	this should return them in regular chronological order  
 	(starting at the first event and ending at the newest). """
 	var splitLog = get_text().split("\n")
-	var outputArray = []
-	for i in range(len(splitLog) - 1, -1, -1):
-		outputArray.append(splitLog[i])
-	return "\n".join(outputArray)
+	splitLog.reverse()
+	return "\n".join(splitLog)
 
 
 func saveTextToFile():

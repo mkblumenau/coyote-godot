@@ -13,8 +13,6 @@ Immediate goals:
 	Make the main menu button prompt for if you really want to return to main menu?
 		Might not be necessary now that you have to click two buttons to get to it
 	Implement the thing where all cards are shown after a challenge
-		Also, maybe make it so it somehow pauses before starting the next turn
-		after a challenge?
 		
 Useful information for writing this
 	See https://docs.godotengine.org/en/stable/classes/class_node.html# 

@@ -45,13 +45,6 @@ func _ready():
 			newPlayer.updateName("Comp" + str(i))
 		$PlayerGrid.move_child($PlayerGrid/MiddleCard, -1)
 	
-	"""
-	# This was just to test out the game log.
-	for i in range(1, 21):
-		var textSource = $UICanvas/GameLog/VBoxContainer/GameLogText
-		textSource.set_text("kijetesantakalu nasa nanpa " + str(i) + "\n" + textSource.get_text())
-	"""
-	
 	currentPlayer = players()[0]
 	#print(players()[0])
 	setUpRound()
@@ -73,61 +66,60 @@ func _process(delta):
 func livingPlayers():
 	# Returns a list of all living players.
 	# Use len(livingPlayers()) to get living player count.
-	var output = []
-	#print("Calling livingPlayers()")
-	for player in players():
-		#print(player.get_name() + " is alive: " + str(player.isAlive()))
-		if player.isAlive():
-			output.append(player)
-	return output
+	return players().filter(func(player): return player.isAlive())
 
 
 func players():
 	# Returns a list of all players.
-	# It seems like for some reason this is being called over and over.
-	#print("Calling players().")
-	var output = []
-	for player in $PlayerGrid.get_children():
-		if player.is_in_group("Player"):
-			output.append(player)
-	return output
+	return $PlayerGrid.get_children().filter(func(player): return player.is_in_group("Player"))
 
 
 func nextLivingPlayer(player):
 	# Get the next living player after a specific player.
-	var index = player.get_index()
-	var currentPlayerNLP = player
-	var foo = 1
-	if len(livingPlayers()) < 2:
-		return player
-	else:
-		while foo == 1:
-			index += 1
-			if index > len(players()):
-				index = 0
-			currentPlayerNLP = player.get_parent().get_child(index)
-			#print("Loop running on player " + currentPlayerNLP.get_name())
-			if currentPlayerNLP.is_in_group("Player"):
-				if currentPlayerNLP.isAlive():
-					foo = 0
-					return currentPlayerNLP
+	# This and lastLivingPlayer exist instead of just using lastLivingPlayerNew
+	# because I made them before writing nextLivingPlayerNew.
+	return nextLivingPlayerNew(player, true)
 
 
 func lastLivingPlayer(player):
 	# Get the previous living player after a specific player.
-	var index = player.get_index()
-	var currentPlayerLLP = player
+	return nextLivingPlayerNew(player, false)
+
+
+func nextLivingPlayerNew(player, direction):
+	# Return the next living player in a direction.
+	# true = forward/in turn order
+	# false = backward/against turn order
+	# This doesn't use livingPlayers() just in case player is dead.
+	
+	var index = players().find(player)
+	var currentPlayerNLP = player
+	
+	var indexChange = 1
+	
+	if direction:
+		indexChange = 1
+	else:
+		indexChange = -1
+		
 	if len(livingPlayers()) < 2:
+		"""
+		Error checking: If there's one or less living players,
+		don't bother cycling through the list.
+		Just return the same player as the input.
+		I don't think this would ever be an issue.
+		"""
 		return player
 	else:
 		while true:
-			index -= 1
-			if index >= len(players()):
-				index = len(players()) - 1
-			currentPlayerLLP = player.get_parent().get_child(index)
-			if currentPlayerLLP.is_in_group("Player"):
-				if currentPlayerLLP.isAlive():
-					return currentPlayerLLP
+			# Change the index in the specified direction,
+			# making sure it doesn't go out of bounds.
+			# Then if the player at that index is alive, return them.
+			index += indexChange
+			index = wrapi(index, 0, len(players()))
+			currentPlayerNLP = players()[index]
+			if currentPlayerNLP.isAlive():
+				return currentPlayerNLP
 
 
 func setUpRound():
@@ -193,6 +185,7 @@ func cardTranslated(cardNumber):
 
 func startTurn():
 	# Start a turn without changing whose turn it is.
+	#print(currentPlayer)
 	if currentPlayer.isHumanPlayer:
 		# show the interface and set the minimum bid to the current + 1
 		#$UICanvas/BidInput.min_value = currentBid + 1
@@ -312,7 +305,7 @@ func resolveChallenge():
 		gameLog.addText("---")
 		challenger.openEye()
 		bidder.loseEye()
-		setUpRound()
+		#setUpRound()
 		if bidder.isAlive():
 			#specificPlayerStartTurn(bidder)
 			currentPlayer = bidder
@@ -328,7 +321,7 @@ func resolveChallenge():
 		gameLog.addText("---")
 		bidder.openEye()
 		challenger.loseEye()
-		setUpRound()
+		#setUpRound()
 		if challenger.isAlive():
 			#specificPlayerStartTurn(challenger)
 			currentPlayer = challenger
@@ -349,6 +342,7 @@ func startChallenge():
 	# Before I fixed this, there was an amusing bug where the winning player
 	# would just continue to play forever against themselves.
 	if len(livingPlayers()) > 1:
+		setUpRound()
 		startTurn()
 
 
