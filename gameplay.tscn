@@ -301,7 +301,7 @@ text = "No"
 [connection signal="pressed" from="Menu/VBoxContainer/CloseMenuButton" to="." method="_on_close_menu_button_pressed"]
 [connection signal="pressed" from="RulesMenu/CloseButton" to="UICanvas/VBoxContainer/HBoxContainer/OpenMenuButton" method="grab_focus"]
 [connection signal="pressed" from="LeaveGameMenu/VBoxContainer/HBoxContainer/LeaveGameButton" to="." method="_on_leave_game_button_pressed"]
-[connection signal="pressed" from="LeaveGameMenu/VBoxContainer/HBoxContainer/NoButton" to="UICanvas/VBoxContainer/HBoxContainer/PlayerUI/RaiseBidButton" method="grab_focus"]
+[connection signal="pressed" from="LeaveGameMenu/VBoxContainer/HBoxContainer/NoButton" to="UICanvas/VBoxContainer/HBoxContainer/OpenMenuButton" method="grab_focus"]
 [connection signal="pressed" from="LeaveGameMenu/VBoxContainer/HBoxContainer/NoButton" to="LeaveGameMenu" method="hide"]
 
 [editable path="RulesMenu"]
