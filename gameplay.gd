@@ -1,18 +1,23 @@
 extends Node
 
-#variables
-
-#reference to the game log
+"""
+This is the central script of the game, handling the game flow
+as well as controlling UI elements (most of them affected by the game state).
+"""
 
 # These define which numbers are used as the placeholders for
 # the Max Zero and Question cards respectively.
 var MAX_ZERO_VALUE = 100
 var QUESTION_VALUE = 99
 
+# This is set to the number lower than the lowest possible score
+# (-15, given 2 players and cards -10, -5, 0).
+# That way, the lowest valid bid is the lowest one possible in-game.
 var DEFAULT_STARTING_BID = -16
 var CHALLENGE_WAIT_TIME: float = 4 # in seconds
 
 var deck = []
+
 @export var currentPlayer: Node
 var isFirstTurnOfRound = true
 var currentBid = -16
@@ -20,48 +25,54 @@ var middleCard = 0
 var allCardsVisible = false
 var cardDealtFromQuestion = 0
 
+@export_category("Player creation elements")
 @export var playerTemplate: PackedScene #The template for a new player.
-var gameLog
+@export var playerGrid: Node
+
+@export_category("UI elements")
+@export var eventsTracker: Node
+@export var totalVisibleToPlayer: Node
+@export var bidInput: Node
+@export var lastAction: Node
+@export var playerUI: Node
+@export var sfx: Node
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize()
-	gameLog = $UICanvas/GameLog/VBoxContainer/GameLogText
-	$UICanvas/OpenMenuButton.grab_focus()
+	$UICanvas/VBoxContainer/HBoxContainer/OpenMenuButton.grab_focus()
+	
 	var newPlayer
-	#print(str($/root/GlobalVariables.playerCount))
 	# Create the right number of players as children.
 	# Reparent them all to PlayerGrid.
 	# Make the first player in the list the player whose turn it is.
 	# Make sure the first player to be created is a human.
 	for i in range($/root/GlobalVariables.playerCount + 1):
 		newPlayer = playerTemplate.instantiate()
-		#newPlayer.reparent($PlayerGrid)
-		$PlayerGrid.add_child(newPlayer)
+		playerGrid.add_child(newPlayer)
 		if i == 0:
 			newPlayer.isHumanPlayer = true
 			newPlayer.isUIPlayer = true
 			newPlayer.updateName("Player")
 		else:
 			newPlayer.updateName("Comp" + str(i))
-		$PlayerGrid.move_child($PlayerGrid/MiddleCard, -1)
+		playerGrid.move_child(playerGrid.find_child("MiddleCard"), -1)
 	
 	currentPlayer = players()[0]
-	#print(players()[0])
 	setUpRound()
 	startTurn()
-	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	# Update the total visible to player specific display for the UI player.
 	var playerToUse = currentPlayer
 	for p in players():
 		if p.isUIPlayer:
 			playerToUse = p
 	
-	$UICanvas/TotalVisibleToPlayer.text = "Total visible: " + playerToUse.totalKnownToPlayerAsString()
-	pass
+	totalVisibleToPlayer.text = "Total visible: " + playerToUse.totalKnownToPlayerAsString()
 
 
 func livingPlayers():
@@ -72,7 +83,7 @@ func livingPlayers():
 
 func players():
 	# Returns a list of all players.
-	return $PlayerGrid.get_children().filter(func(player): return player.is_in_group("Player"))
+	return playerGrid.get_children().filter(func(player): return player.is_in_group("Player"))
 
 
 func nextLivingPlayer(player):
@@ -132,7 +143,8 @@ func setUpRound():
 	resetPeeks()
 	currentBid = DEFAULT_STARTING_BID
 	isFirstTurnOfRound = true
-	$PlayerGrid/MiddleCard.card = middleCard
+	playerGrid.find_child("MiddleCard").card = middleCard
+	eventsTracker.updateLastAction()
 
 
 func makeDeck():
@@ -162,7 +174,6 @@ func dealOutCards():
 	middleCard = deck[i]
 	i += 1
 	cardDealtFromQuestion = deck[i]
-	pass
 
 
 func resetPeeks():
@@ -187,29 +198,26 @@ func cardTranslated(cardNumber):
 
 
 func startTurn():
+	eventsTracker.updateLastAction()
 	# Start a turn without changing whose turn it is.
 	#print(currentPlayer)
 	if currentPlayer.isHumanPlayer:
 		# show the interface and set the minimum bid to the current + 1
 		#$UICanvas/BidInput.min_value = currentBid + 1
-		$UICanvas/PlayerUI/BidInput.value = currentBid + 1
+		bidInput.value = currentBid + 1
 		showPlayerUI()
-		pass
 	else:
 		# call the script for the AI turn
 		currentPlayer.startAITurn()
-		pass
 
 
 func nextPlayersTurn():
 	#print(nextLivingPlayer(currentPlayer).get_name())
-	currentPlayer = nextLivingPlayer(currentPlayer)
-	startTurn()
+	specificPlayerStartTurn(nextLivingPlayer(currentPlayer))
 
 
 func lastPlayerNewTurn():
-	currentPlayer = lastLivingPlayer(currentPlayer)
-	startTurn()
+	specificPlayerStartTurn(lastLivingPlayer(currentPlayer))
 
 
 func specificPlayerStartTurn(player):
@@ -220,15 +228,13 @@ func specificPlayerStartTurn(player):
 
 func raiseBid(newBid):
 	# Called by a player script whenever the bid is raised.
-	#print($PlayerGrid.get_children())
+	sfx.playRaiseSound()
 	currentBid = newBid
 	currentPlayer.canChallengeThisRound = true
 	isFirstTurnOfRound = false
 	#update the game log
-	#$UICanvas/GameLog/VBoxContainer/GameLogText.add_text(currentPlayer.get_name() + " raised the bid to " + str(newBid) + ".")
-	gameLog.addText(currentPlayer.get_name() + " raised the bid to " + str(newBid) + ".")
+	eventsTracker.addLogLine(currentPlayer.get_name() + " raised the bid to " + str(int(newBid)) + ".")
 	nextPlayersTurn()
-	#print(str(newBid))
 
 
 func cardTotal():
@@ -291,26 +297,31 @@ func resolveChallenge():
 	var bidder = lastLivingPlayer(currentPlayer)
 	var questionSeen = false
 	# Tell the game log what all the cards were.
-	gameLog.addText(challenger.get_name() + " challenged " + bidder.get_name() + "'s bid of " + str(currentBid) + ".")
-	gameLog.addText("The total was " + str(cardTotal()) + ".")
+	eventsTracker.addLineBreak()
+	#eventsTracker.addLogLine(challenger.get_name() + " challenged " + bidder.get_name() + "'s bid of " \
+	#	+ str(int(currentBid)) + ".")
+	eventsTracker.addLogLine(challenger.get_name() + " challenged " + bidder.get_name() + "'s bid.")
+	
+	eventsTracker.addLogLine("\tThe total was " + str(cardTotal()) + ".")
+	eventsTracker.addLineBreak()
 	# actually say the card names here
-	gameLog.addText("The middle card was " + cardTranslated(middleCard))
+	eventsTracker.addLogLine("\tThe middle card was " + cardTranslated(middleCard))
 	if middleCard == QUESTION_VALUE:
 		questionSeen = true
 		
 	for p in players():
 		if p.isAlive():
-			gameLog.addText(p.get_name() + " had " + cardTranslated(p.card))
+			eventsTracker.addLogLine("\t" + p.get_name() + " had " + cardTranslated(p.card))
 			if p.card == QUESTION_VALUE:
 				questionSeen = true
 	
 	if questionSeen:
-		gameLog.addText("The card drawn from ? was " + cardTranslated(cardDealtFromQuestion))
+		eventsTracker.addLogLine("\tThe card drawn from ? was " + cardTranslated(cardDealtFromQuestion))
 	
 	#Resolve the challenge.
 	if challengerWins():
-		gameLog.addText(challenger.get_name() + " won the challenge.")
-		gameLog.addText("---")
+		eventsTracker.addLogLine(challengeResultString(challenger, bidder))
+		eventsTracker.addRoundBreak()
 		challenger.openEye()
 		bidder.loseEye()
 		#setUpRound()
@@ -325,8 +336,10 @@ func resolveChallenge():
 				currentPlayer = challenger
 	else:
 		# if the bidder wins
-		gameLog.addText(bidder.get_name() + " won the challenge.")
-		gameLog.addText("---")
+		eventsTracker.addLogLine(challengeResultString(bidder, challenger))
+		eventsTracker.addLineBreak()
+		eventsTracker.addRoundBreak()
+		eventsTracker.addLineBreak()
 		bidder.openEye()
 		challenger.loseEye()
 		#setUpRound()
@@ -339,11 +352,18 @@ func resolveChallenge():
 			else:
 				currentPlayer = nextLivingPlayer(challenger)
 				#startTurn()
-	pass
+	eventsTracker.updateLastAction()
+
+
+func challengeResultString(winner, loser):
+	return winner.get_name() + " won the challenge vs. " + loser.get_name() + \
+		" (bid was " \
+		+ str(int(currentBid)) + "; total was " + str(int(cardTotal())) + ")."
 
 
 func startChallenge():
 	#Calls resolveChallenge(), then waits a while before starting the next turn.
+	sfx.playChallengeSound()
 	resolveChallenge()
 	await $ChallengeTimer.timeout
 	# Only start the turn if more than one player is still alive.
@@ -356,42 +376,46 @@ func startChallenge():
 
 func victory(player):
 	#Tell the game log that player won.
-	gameLog.addText(player.get_name() + " wins!")
+	sfx.playEndGameSound()
+	eventsTracker.addLogLine(player.get_name() + " wins!")
+	eventsTracker.updateLastAction()
 	pass
 
 
 func sendPeekToGameLog(player):
 	# Tell the game log that that player peeked.
 	# Called by player scripts.
-	gameLog.addText(player.get_name() + " peeked.")
-	pass
+	eventsTracker.addLogLine(player.get_name() + " peeked.")
+	eventsTracker.updateLastAction()
 
 
+# UI stuff
 func showPlayerUI():
-	$UICanvas/PlayerUI.show()
+	playerUI.show()
 	updatePlayerUIButtonStates()
-	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()
+	if not $Menu.visible:
+		playerUI.find_child("RaiseBidButton").grab_focus()
 	
 	
 func updatePlayerUIButtonStates():
-	$UICanvas/PlayerUI/PeekButton.set_disabled(false)
+	playerUI.find_child("PeekButton").set_disabled(false)
 	if isFirstTurnOfRound or currentPlayer.eyesOpen <= 0 or currentPlayer.canSeeMiddleCard:
-		$UICanvas/PlayerUI/PeekButton.set_disabled(true)
+		playerUI.find_child("PeekButton").set_disabled(true)
 		
-	$UICanvas/PlayerUI/ChallengeButton.set_disabled(false)
+	playerUI.find_child("ChallengeButton").set_disabled(false)
 	if isFirstTurnOfRound or currentPlayer.canChallengeThisRound == false:
-		$UICanvas/PlayerUI/ChallengeButton.set_disabled(true)
+		playerUI.find_child("ChallengeButton").set_disabled(true)
 
 
 func hidePlayerUI():
-	$UICanvas/PlayerUI.hide()
-	$UICanvas/OpenMenuButton.grab_focus()
+	playerUI.hide()
+	$UICanvas/VBoxContainer/HBoxContainer/OpenMenuButton.grab_focus()
 
 
 func _on_raise_bid_button_pressed():
 	hidePlayerUI()
-	if $UICanvas/PlayerUI/BidInput.value > currentBid:
-		raiseBid($UICanvas/PlayerUI/BidInput.value)
+	if bidInput.value > currentBid:
+		raiseBid(bidInput.value)
 	else:
 		raiseBid(currentBid + 1)
 
@@ -412,23 +436,30 @@ func _on_peek_button_pressed():
 
 
 func _on_return_to_main_button_pressed():
-	get_tree().change_scene_to_file("res://main_menu.tscn")
+	#get_tree().change_scene_to_file("res://main_menu.tscn")
+	$Menu.hide()
+	$LeaveGameMenu.show()
+	$LeaveGameMenu/VBoxContainer/HBoxContainer/NoButton.grab_focus()
 
 
 func _on_open_menu_button_pressed():
 	$Menu.show()
-	$Menu/CloseMenuButton.grab_focus()
+	$Menu/VBoxContainer/CloseMenuButton.grab_focus()
 
 
 func _on_close_menu_button_pressed():
 	$Menu.hide()
-	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()
+	$UICanvas/VBoxContainer/HBoxContainer/OpenMenuButton.grab_focus()
 
 
-func _on_rules_button_pressed():
-	$RulesMenu.show()
-	$Menu.hide()
+func _on_save_to_file_button_pressed() -> void:
+	eventsTracker.saveLogTextToFile()
+	_on_close_menu_button_pressed()
 
 
-func _on_close_button_pressed():
-	$UICanvas/PlayerUI/RaiseBidButton.grab_focus()
+func _on_sound_mute_checkbox_toggled(toggled_on: bool) -> void:
+	sfx.setSoundOn(toggled_on)
+
+
+func _on_leave_game_button_pressed() -> void:
+	get_tree().change_scene_to_file("res://main_menu.tscn")

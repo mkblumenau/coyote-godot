@@ -1,13 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://smtwt3d8ajo4"]
-
-[ext_resource type="Script" path="res://rules_menu.gd" id="1_fb70j"]
+[gd_scene load_steps=2 format=3 uid="uid://smtwt3d8ajo4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_48vxq"]
 font_size = 48
 font_color = Color(0, 0, 0, 1)
 
 [node name="RulesMenu" type="CanvasLayer"]
-script = ExtResource("1_fb70j")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 offset_left = 370.0
@@ -55,7 +52,14 @@ Players have three choices on each of their turns:
 - Peek. This can only be done if you have at least one open Eye card. To peek, flip one of your open Eye cards closed, then look at the card in the middle. After doing this, you must raise the bid.
 - Challenge. Do this if you think that the previous bid is higher than the total. Everyone reveals what cards they had. You win the challenge if the previous bid was higher than the total; otherwise, the previous bidder wins. The player who won the challenge flips one of their closed Eye cards back to open. The losing player discards one of their Eye cards (which can be closed). After this, the player who lost the challenge takes the next turn. If that player is now out of the game, the next living player in turn order goes instead.
 
-Once a player has no Eye cards left (closed or open), they're out of the game. Once only one player is left in the game, that player wins!"
+Once a player has no Eye cards left (closed or open), they're out of the game. Once only one player is left in the game, that player wins!
+
+The game interface displays:
+	Each player's name
+	The number of Eyes each player has and if they're open (O for an open eye; C for a closed one)
+	Each player's card (if revealed)
+	The middle card (if revealed)
+	Whose turn it is (indicated by a green box to the left of the player's card)"
 
 [node name="CloseButton" type="Button" parent="."]
 offset_left = 578.0
@@ -64,4 +68,4 @@ offset_right = 628.0
 offset_bottom = 537.0
 text = "Close"
 
-[connection signal="pressed" from="CloseButton" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="CloseButton" to="." method="hide"]

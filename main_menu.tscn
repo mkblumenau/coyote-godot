@@ -1,42 +1,54 @@
 [gd_scene load_steps=4 format=3 uid="uid://dywqqq8myc01b"]
 
-[ext_resource type="Script" path="res://main_menu.gd" id="1_ivhmm"]
+[ext_resource type="Script" uid="uid://dsp4s1ipl8j78" path="res://main_menu.gd" id="1_ivhmm"]
+[ext_resource type="PackedScene" uid="uid://c8euiab0605ec" path="res://sound_mute_checkbox.tscn" id="2_fu7sn"]
 [ext_resource type="PackedScene" uid="uid://smtwt3d8ajo4" path="res://rules_menu.tscn" id="2_h5teh"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_4qnb8"]
-font_size = 72
 
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource("1_ivhmm")
 
-[node name="GameLabel" type="Label" parent="."]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -121.0
-offset_right = 121.0
-offset_bottom = 102.0
-grow_horizontal = 2
-text = "Coyote"
-label_settings = SubResource("LabelSettings_4qnb8")
-
-[node name="ChoosePlayerCount" type="OptionButton" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -35.0
-offset_top = 36.0
-offset_right = 35.0
-offset_bottom = 111.0
+offset_left = -251.5
+offset_top = -272.5
+offset_right = 251.5
+offset_bottom = 272.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="GameLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Coyote"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EmptyLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerCountLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Number of computer players"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChoosePlayerCount" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
 focus_next = NodePath("../StartGameButton")
 focus_previous = NodePath("../RulesButton")
-theme_override_font_sizes/font_size = 48
-item_count = 5
+theme_override_font_sizes/font_size = 36
+alignment = 1
 selected = 1
+item_count = 5
 popup/item_0/text = "1"
 popup/item_0/id = 0
 popup/item_1/text = "2"
@@ -48,59 +60,35 @@ popup/item_3/id = 3
 popup/item_4/text = "5"
 popup/item_4/id = 4
 
-[node name="PlayerCountLabel" type="Label" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -335.5
-offset_top = -51.0
-offset_right = 335.5
-offset_bottom = 19.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="EmptyLabel2" type="Label" parent="VBoxContainer"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 48
-text = "Number of computer players"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="StartGameButton" type="Button" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -60.5
-offset_top = -156.0
-offset_right = 60.5
-offset_bottom = -81.0
-grow_horizontal = 2
-grow_vertical = 0
-focus_previous = NodePath("../ChoosePlayerCount")
-theme_override_font_sizes/font_size = 48
-text = "Start"
+[node name="SoundMuteCheckbox" parent="VBoxContainer" instance=ExtResource("2_fu7sn")]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+alignment = 1
 
-[node name="RulesButton" type="Button" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -60.5
-offset_top = -484.0
-offset_right = 60.5
-offset_bottom = -409.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="RulesButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
 focus_next = NodePath("../ChoosePlayerCount")
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 36
 text = "Rules"
+
+[node name="StartGameButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+focus_previous = NodePath("../ChoosePlayerCount")
+theme_override_font_sizes/font_size = 36
+text = "Start"
 
 [node name="RulesMenu" parent="." instance=ExtResource("2_h5teh")]
 visible = false
 
-[connection signal="item_selected" from="ChoosePlayerCount" to="." method="_on_option_button_item_selected"]
-[connection signal="pressed" from="StartGameButton" to="." method="_on_start_game_button_pressed"]
-[connection signal="pressed" from="RulesButton" to="." method="_on_rules_button_pressed"]
+[connection signal="item_selected" from="VBoxContainer/ChoosePlayerCount" to="." method="_on_option_button_item_selected"]
+[connection signal="pressed" from="VBoxContainer/RulesButton" to="." method="_on_rules_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/StartGameButton" to="." method="_on_start_game_button_pressed"]
 [connection signal="pressed" from="RulesMenu/CloseButton" to="." method="_on_close_button_pressed"]
 
 [editable path="RulesMenu"]

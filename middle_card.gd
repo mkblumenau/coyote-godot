@@ -1,18 +1,16 @@
 extends Control
 
-var card = 0
+var card: int = 0
 var gameplayScript
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	gameplayScript = $/root/Gameplay # get the script for the main gameplay actions
-	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	setSprite()
-	pass
 
 
 func setSprite():
@@ -41,4 +39,4 @@ func setSprite():
 	
 	path += ".png"
 	#print(path)
-	$Sprite2D.set_texture(load(path))
+	$CardSprite.set_texture(load(path))

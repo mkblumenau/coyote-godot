@@ -1,5 +1,12 @@
 extends Control
 
+"""
+This script is attached to a node representing a player.
+It displays the player's information, takes turns for computer players,
+and handles player variables such as their number of eyes.
+"""
+
+
 @export var isHumanPlayer: bool = false
 @export var isUIPlayer: bool = false
 var card: int = 0
@@ -21,14 +28,13 @@ func _ready():
 	gameplayScript = $/root/Gameplay # get the script for the main gameplay actions
 	#card = -30
 	#updateName("foo")
-	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	setSprite()
 	#$PlayerName.set_text(self.get_name())
-	$EyesCount.set_text(eyesCountWrittenOut())
+	$VBoxContainer/EyesCount.set_text(eyesCountWrittenOut())
 	if isTurn():
 		$TurnIndicator.show()
 	else:
@@ -55,6 +61,7 @@ func peek():
 	canChallengeThisRound = false
 	# send peek notification to the game log
 	gameplayScript.sendPeekToGameLog(self)
+	gameplayScript.sfx.playPeekSound()
 
 
 func isAlive():
@@ -78,6 +85,9 @@ func totalKnownToPlayerAsString():
 	var total = 0
 	var maxZeroFound = false
 	var questionFound = false
+	if gameplayScript.allCardsVisible:
+		return str(int(gameplayScript.cardTotal()))
+	
 	for p in gameplayScript.livingPlayers():
 		if p != self:
 			if p.card == gameplayScript.MAX_ZERO_VALUE:
@@ -108,8 +118,12 @@ func totalKnownToPlayerAsString():
 func eyesCountWrittenOut():
 	var outputString = ""
 	if eyesTotal > 0:
+		"""
 		outputString += str(eyesTotal) + " eyes, "
 		outputString += str(eyesOpen) + " open"
+		"""
+		outputString += "O ".repeat(eyesOpen)
+		outputString += "C ".repeat(eyesTotal - eyesOpen)
 	else:
 		outputString = "Out"
 	return outputString
@@ -133,10 +147,7 @@ func startAITurn():
 
 func isTurn():
 	#function to return if it's this player's turn
-	if gameplayScript.currentPlayer == self:
-		return true
-	else:
-		return false
+	return gameplayScript.currentPlayer == self
 
 
 func setSprite():
@@ -148,7 +159,7 @@ func setSprite():
 	var path = "res://assets/images/cards/"
 	
 	if isAlive():
-		$Sprite2D.show()
+		$CardSprite.show()
 		if isUIPlayer and not gameplayScript.allCardsVisible:
 			path += "Back"
 		else:
@@ -160,22 +171,12 @@ func setSprite():
 				path += str(card)
 		
 		path += ".png"
-		$Sprite2D.set_texture(load(path))
+		$CardSprite.set_texture(load(path))
 	else:
-		$Sprite2D.hide()
+		$CardSprite.hide()
 
 
 func updateName(newName):
 	""" Updates the name, both of the node and on the display. """
 	set_name.call_deferred(newName)
-	$PlayerName.set_text(newName)
-
-
-func playersList():
-	var tempList = get_parent().get_children()
-	var output = []
-	for i in tempList:
-		if i.is_in_group("Player"):
-			output.append(i)
-	
-	return output
+	$VBoxContainer/PlayerName.set_text(newName)

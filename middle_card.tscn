@@ -1,24 +1,29 @@
 [gd_scene load_steps=4 format=3 uid="uid://0s8rdift2p8i"]
 
-[ext_resource type="Script" path="res://middle_card.gd" id="1_o2dpm"]
+[ext_resource type="Script" uid="uid://cxru6ni85e2g2" path="res://middle_card.gd" id="1_o2dpm"]
 [ext_resource type="Texture2D" uid="uid://cvg8f8fhin2kk" path="res://assets/images/cards/Back.png" id="2_1m8a3"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_nqwiu"]
-font_size = 72
+font_size = 64
 
-[node name="Middle card" type="Control" groups=["Middle"]]
+[node name="Middle card" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-scale = Vector2(0.44, 0.44)
 script = ExtResource("1_o2dpm")
 
-[node name="PlayerName" type="Label" parent="."]
-offset_left = 352.273
-offset_right = 786.273
-offset_bottom = 102.0
+[node name="CardSprite" type="Sprite2D" parent="."]
+position = Vector2(195, 96)
+texture = ExtResource("2_1m8a3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 338.0
+offset_top = -7.0
+offset_right = 772.0
+offset_bottom = 163.0
+theme_override_constants/separation = 10
+
+[node name="PlayerName" type="Label" parent="VBoxContainer"]
+layout_mode = 2
 text = "Middle card"
 label_settings = SubResource("LabelSettings_nqwiu")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(208, 96)
-texture = ExtResource("2_1m8a3")

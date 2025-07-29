@@ -3,8 +3,7 @@ extends CanvasLayer
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$StartGameButton.grab_focus()
-	pass # Replace with function body.
+	$VBoxContainer/StartGameButton.grab_focus()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -26,4 +25,4 @@ func _on_rules_button_pressed():
 
 
 func _on_close_button_pressed():
-	$StartGameButton.grab_focus()
+	$VBoxContainer/StartGameButton.grab_focus()

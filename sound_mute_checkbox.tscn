@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8euiab0605ec"]
+
+[ext_resource type="Script" uid="uid://dsjo6pbvkf1u8" path="res://sound_mute_checkbox.gd" id="1_ey15y"]
+
+[node name="SoundMuteCheckbox" type="CheckBox"]
+text = "Sound on"
+script = ExtResource("1_ey15y")
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
